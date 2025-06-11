@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Facade
+    participant PlaceModel
+    participant Storage
+
+    Client->>API: POST /places (name, location, user_id)
+    API->>Facade: create_place(data)
+    Facade->>PlaceModel: new Place(data)
+    PlaceModel-->>Facade: Place instance
+    Facade->>Storage: save(Place)
+    Storage-->>Facade: success
+    Facade-->>API: return 201 Created
+    API-->>Client: HTTP 201 Created

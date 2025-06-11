@@ -1,0 +1,18 @@
+graph TB
+    subgraph Presentation Layer (API)
+        API["API Endpoints"]
+    end
+
+    subgraph Business Logic Layer
+        Facade["Facade"]
+        Models["Models (User, Place, Review, Amenity)"]
+    end
+
+    subgraph Persistence Layer
+        Storage["Storage (File or DB)"]
+    end
+
+    API --> Facade
+    Facade --> Models
+    Models --> Storage
+    Storage --> API

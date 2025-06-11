@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Facade
+    participant ReviewModel
+    participant Storage
+
+    Client->>API: POST /reviews (text, user_id, place_id)
+    API->>Facade: submit_review(data)
+    Facade->>ReviewModel: new Review(data)
+    ReviewModel-->>Facade: Review instance
+    Facade->>Storage: save(Review)
+    Storage-->>Facade: success
+    Facade-->>API: return 201 Created
+    API-->>Client: HTTP 201 Created
+    Note over Client, API: Review submission successful

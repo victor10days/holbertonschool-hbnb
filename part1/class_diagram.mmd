@@ -1,0 +1,63 @@
+classDiagram
+    class Basemodel {
+        +String id
+        +String createdAt
+        +String updatedAt
+        +save()
+        +delete()
+    }
+
+    class Location {
+        +String latitude
+        +String longitude
+        +String address
+        +getCoordinates()
+        +getAddress()
+    }
+    class Category {
+        +String name
+        +String description
+        +List<Place> places
+        +getPlaces()
+    }
+    class User {
+        +String name
+        +String email
+        +String password
+        +login()
+        +logout()
+    }
+
+    class Place {
+        +String name
+        +String location
+        +addReview(Review review)
+        +getReviews()
+    }
+
+    class Review {
+        +String content
+        +int rating
+        +User user
+        +Place place
+        +getDetails()
+    }
+
+    class Amenity {
+        +String name
+        +String description
+        +Place place
+        +getDetails()
+    }
+    Basemodel <|-- User : inherits
+    Basemodel <|-- Place : inherits
+    Basemodel <|-- Review : inherits
+    Basemodel <|-- Amenity : inherits
+    User "1" --> "*" Review : writes
+    User "1" --> "*" Place : owns
+    Place "1" --> "*" Review : has
+    Place "1" --> "*" Amenity : offers
+    Category "1" --> "*" Place : includes
+    Location "1" --> "1" Place : located at
+    Location "1" --> "1" User : associated with
+

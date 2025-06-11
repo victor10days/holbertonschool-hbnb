@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Facade
+    participant Storage
+
+    Client->>API: GET /places
+    API->>Facade: get_all_places()
+    Facade->>Storage: all("Place")
+    Storage-->>Facade: list of Place instances
+    Facade-->>API: serialize and return list
+    API-->>Client: HTTP 200 OK + JSON

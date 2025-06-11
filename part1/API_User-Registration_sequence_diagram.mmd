@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant Facade
+    participant UserModel
+    participant Storage
+
+    Client->>API: POST /users (name, email, password)
+    API->>Facade: register_user(data)
+    Facade->>UserModel: new User(data)
+    UserModel-->>Facade: User instance
+    Facade->>Storage: save(User)
+    Storage-->>Facade: success
+    Facade-->>API: return 201 Created
+    API-->>Client: HTTP 201 Created
