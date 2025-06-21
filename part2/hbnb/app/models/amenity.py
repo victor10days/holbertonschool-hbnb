@@ -1,11 +1,15 @@
-class Amenity:
-    def __init__(self, name: str, description: str, location: str):
+# Amenity class for the HBNB application
+# This file is the amenity model, which inherits from BaseModel and represents an amenity in the application.
+
+from .base_model import BaseModel
+
+class Amenity(BaseModel):
+    def __init__(self, name, description, place_id=None):
+        super().__init__()
         self.name = name
         self.description = description
-        self.location = location
+        self.place_id = place_id
 
-    def __str__(self):
-        return f"Amenity(name={self.name}, description={self.description}, location={self.location})"
-
-    def __repr__(self):
-        return self.__str__()
+    def to_dict(self):
+        data = super().to_dict()
+        return data

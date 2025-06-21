@@ -1,10 +1,15 @@
-class Review:
-    def __init__(self, review_id: int, user_id: int, product_id: int, rating: float, comment: str):
-        self.review_id = review_id
-        self.user_id = user_id
-        self.product_id = product_id
-        self.rating = rating
-        self.comment = comment
+# This file is the review model, which inherits from BaseModel and represents a review in the application.
 
-    def __repr__(self):
-        return f"Review(review_id={self.review_id}, user_id={self.user_id}, product_id={self.product_id}, rating={self.rating}, comment='{self.comment}')"
+from .base_model import BaseModel
+
+class Review(BaseModel):
+    def __init__(self, content, user_id, place_id, rating=None):
+        super().__init__()
+        self.content = content
+        self.user_id = user_id
+        self.place_id = place_id
+        self.rating = rating
+
+    def to_dict(self):
+        data = super().to_dict()
+        return data

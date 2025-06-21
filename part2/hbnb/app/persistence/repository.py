@@ -1,52 +1,38 @@
-from abc import ABC, abstractmethod
+# hbnb/app/persistence/repository.py
 
-class Repository(ABC):
-    @abstractmethod
-    def add(self, obj):
-        pass
-
-    @abstractmethod
-    def get(self, obj_id):
-        pass
-
-    @abstractmethod
-    def get_all(self):
-        pass
-
-    @abstractmethod
-    def update(self, obj_id, data):
-        pass
-
-    @abstractmethod
-    def delete(self, obj_id):
-        pass
-
-    @abstractmethod
-    def get_by_attribute(self, attr_name, attr_value):
-        pass
-
-
-class InMemoryRepository(Repository):
+class Repository:
     def __init__(self):
-        self._storage = {}
+        self._objects = {}
 
     def add(self, obj):
-        self._storage[obj.id] = obj
+        self._objects[obj.id] = obj
 
     def get(self, obj_id):
-        return self._storage.get(obj_id)
+        return self._objects.get(obj_id)
 
     def get_all(self):
-        return list(self._storage.values())
+        return list(self._objects.values())
 
-    def update(self, obj_id, data):
+    def update(self, obj_id, **kwargs):
         obj = self.get(obj_id)
-        if obj:
-            obj.update(data)
+        if not obj:
+            return None
+        for key, value in kwargs.items():
+            if key not in ['id', 'created_at', 'updated_at']:
+                setattr(obj, key, value)
+        obj.save()
+        return obj
 
     def delete(self, obj_id):
-        if obj_id in self._storage:
-            del self._storage[obj_id]
+        if obj_id in self._objects:
+            del self._objects[obj_id]
+            return True
+        return False
 
-    def get_by_attribute(self, attr_name, attr_value):
-        return next((obj for obj in self._storage.values() if getattr(obj, attr_name) == attr_value), None)
+# Hold repositories for each type as a singleton
+_repos = {}
+
+def get_repository(kind):
+    if kind not in _repos:
+        _repos[kind] = Repository()
+    return _repos[kind]
