@@ -50,3 +50,7 @@ class PlaceResource(Resource):
         if not place:
             ns.abort(404, 'Place not found')
         return place.to_dict()
+    def post(self):
+        data = ns.payload
+        if not data.get('name'):
+            ns.abort(400, 'Name is required')
