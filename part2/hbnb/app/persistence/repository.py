@@ -1,5 +1,3 @@
-# hbnb/app/persistence/repository.py
-
 class Repository:
     def __init__(self):
         self._objects = {}
@@ -23,13 +21,6 @@ class Repository:
         obj.save()
         return obj
 
-    def delete(self, obj_id):
-        if obj_id in self._objects:
-            del self._objects[obj_id]
-            return True
-        return False
-
-# Hold repositories for each type as a singleton
 _repos = {}
 
 def get_repository(kind):

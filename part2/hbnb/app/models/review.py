@@ -1,15 +1,15 @@
-# This file is the review model, which inherits from BaseModel and represents a review in the application.
-
 from .base_model import BaseModel
 
 class Review(BaseModel):
-    def __init__(self, content, user_id, place_id, rating=None):
+    def __init__(self, text, user_id, place_id, valid_user_ids, valid_place_ids, **kwargs):
+        if not text:
+            raise ValueError("text is required")
+        if user_id not in valid_user_ids:
+            raise ValueError("Invalid user_id")
+        if place_id not in valid_place_ids:
+            raise ValueError("Invalid place_id")
         super().__init__()
-        self.content = content
+        self.text = text
         self.user_id = user_id
         self.place_id = place_id
-        self.rating = rating
-
-    def to_dict(self):
-        data = super().to_dict()
-        return data
+        # Handle additional fields if required
