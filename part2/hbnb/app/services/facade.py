@@ -1,7 +1,7 @@
 from app.persistence.repository import get_repository
 from app.models.user import User
 
-class Facade:
+class HBnBFacade:
     def __init__(self):
         self.user_repo = get_repository('user')
 
@@ -23,5 +23,7 @@ _facade = None
 def get_facade():
     global _facade
     if _facade is None:
-        _facade = Facade()
+        _facade = HBnBFacade()
     return _facade
+
+
