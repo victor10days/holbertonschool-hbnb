@@ -37,6 +37,18 @@ def create_app(config_name='default'):
     def missing_token_callback(error):
         return jsonify({'error': 'Authentication token is required'}), 401
     
+    # Add root route before initializing API
+    @app.route('/')
+    def index():
+        return jsonify({
+            'message': 'Welcome to HBnB API',
+            'documentation': '/api/v1/',
+            'endpoints': {
+                'users': '/api/v1/users/',
+                'auth': '/api/v1/auth/'
+            }
+        })
+    
     # Initialize API with Swagger documentation
     api = Api(app, version='1.0', title='HBnB API', doc='/api/v1/')
     
