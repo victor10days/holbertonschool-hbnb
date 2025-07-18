@@ -12,4 +12,14 @@ class Review(BaseModel):
         self.text = text
         self.user_id = user_id
         self.place_id = place_id
-        # Handle additional fields if required
+
+    def to_dict(self):
+        data = super().to_dict()
+        return {
+            'id': self.id,
+            'text': self.text,
+            'user_id': self.user_id,
+            'place_id': self.place_id,
+            'created_at': data['created_at'],
+            'updated_at': data['updated_at']
+        }

@@ -15,3 +15,17 @@ class Place(BaseModel):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
+        self.owner_id = kwargs.get('owner_id')
+
+    def to_dict(self):
+        data = super().to_dict()
+        return {
+            'id': self.id,
+            'title': self.title,
+            'price': self.price,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'owner_id': self.owner_id,
+            'created_at': data['created_at'],
+            'updated_at': data['updated_at']
+        }
