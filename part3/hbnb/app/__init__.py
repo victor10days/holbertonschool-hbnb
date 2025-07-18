@@ -45,7 +45,10 @@ def create_app(config_name='default'):
             'documentation': '/api/v1/',
             'endpoints': {
                 'users': '/api/v1/users/',
-                'auth': '/api/v1/auth/'
+                'auth': '/api/v1/auth/',
+                'places': '/api/v1/places/',
+                'reviews': '/api/v1/reviews/',
+                'amenities': '/api/v1/amenities/'
             }
         })
     
@@ -55,10 +58,14 @@ def create_app(config_name='default'):
     # Import and add your namespaces
     from app.api.v1.users import ns as user_ns
     from app.api.v1.auth import ns as auth_ns
+    from app.api.v1.places import ns as place_ns
+    from app.api.v1.reviews import ns as review_ns
+    from app.api.v1.amenities import ns as amenity_ns
     
     api.add_namespace(user_ns, path='/api/v1/users')
     api.add_namespace(auth_ns, path='/api/v1/auth')
-    
-    # TODO: Add other namespaces (places, reviews, amenities) when created
+    api.add_namespace(place_ns, path='/api/v1/places')
+    api.add_namespace(review_ns, path='/api/v1/reviews')
+    api.add_namespace(amenity_ns, path='/api/v1/amenities')
     
     return app

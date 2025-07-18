@@ -1,15 +1,19 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.facade import get_facade
+from app.decorators.auth import require_ownership, admin_required
 
 ns = Namespace('places', description='Place operations')
 
 place_model = ns.model('Place', {
     'id': fields.String(readonly=True),
-    'name': fields.String(required=True),
-    'location': fields.String(required=True),
-    'owner_id': fields.String(required=True),
-    'amenities': fields.List(fields.String),
-    'reviews': fields.List(fields.String),
+    'title': fields.String(required=True),
+    'price': fields.Float(required=True),
+    'latitude': fields.Float(required=True),
+    'longitude': fields.Float(required=True),
+    'owner_id': fields.String(readonly=True),
+    'created_at': fields.DateTime(readonly=True),
+    'updated_at': fields.DateTime(readonly=True),
 })
 
 facade = get_facade()
@@ -18,10 +22,13 @@ facade = get_facade()
 class PlaceList(Resource):
     @ns.expect(place_model)
     @ns.marshal_with(place_model, code=201)
+    @jwt_required()
     def post(self):
         """Create a new place"""
         data = ns.payload
-        place = facade.create_place(**data)
+        current_user_id = get_jwt_identity()
+        data['owner_id'] = current_user_id
+        place = facade.create_place(data)
         return place.to_dict(), 201
 
     @ns.marshal_list_with(place_model)
@@ -43,14 +50,14 @@ class PlaceResource(Resource):
 
     @ns.expect(place_model)
     @ns.marshal_with(place_model)
+    @jwt_required()
+    @require_ownership('place')
     def put(self, id):
         """Update a place by id"""
         data = ns.payload
+        # Remove owner_id from data to prevent changing ownership
+        data.pop('owner_id', None)
         place = facade.update_place(id, **data)
         if not place:
             ns.abort(404, 'Place not found')
         return place.to_dict()
-    def post(self):
-        data = ns.payload
-        if not data.get('name'):
-            ns.abort(400, 'Name is required')
