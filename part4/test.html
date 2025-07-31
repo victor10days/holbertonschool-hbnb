@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Test Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="images/logo.svg" alt="HBnB Logo" class="logo">
+            <a href="index.html" class="login-button">Back to Home</a>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="text-center">HBnB Client Test Page</h1>
+        
+        <div class="form">
+            <h2>API Connection Test</h2>
+            <button id="test-connection" class="details-button">Test API Connection</button>
+            <div id="test-results" style="margin-top: 20px;"></div>
+        </div>
+
+        <div class="form" style="margin-top: 30px;">
+            <h2>Cookie Test</h2>
+            <button id="set-cookie" class="details-button">Set Test Cookie</button>
+            <button id="get-cookie" class="details-button">Get Test Cookie</button>
+            <button id="delete-cookie" class="details-button">Delete Test Cookie</button>
+            <div id="cookie-results" style="margin-top: 20px;"></div>
+        </div>
+    </main>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api/v1';
+        
+        // Cookie utility functions (same as main app)
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        function setCookie(name, value, days = 7) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        }
+        
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<p>Testing API connection...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/places`);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        <div class="success-message">
+                            ✅ API Connection Successful!<br>
+                            Found ${data.length} places
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="error-message">
+                            ❌ API Connection Failed<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        ❌ Network Error<br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        });
+        
+        document.getElementById('set-cookie').addEventListener('click', () => {
+            setCookie('test-cookie', 'test-value-123');
+            document.getElementById('cookie-results').innerHTML = 
+                '<div class="success-message">✅ Test cookie set!</div>';
+        });
+        
+        document.getElementById('get-cookie').addEventListener('click', () => {
+            const value = getCookie('test-cookie');
+            document.getElementById('cookie-results').innerHTML = value 
+                ? `<div class="success-message">✅ Cookie found: ${value}</div>`
+                : '<div class="error-message">❌ Cookie not found</div>';
+        });
+        
+        document.getElementById('delete-cookie').addEventListener('click', () => {
+            deleteCookie('test-cookie');
+            document.getElementById('cookie-results').innerHTML = 
+                '<div class="success-message">✅ Test cookie deleted!</div>';
+        });
+    </script>
+</body>
+</html>

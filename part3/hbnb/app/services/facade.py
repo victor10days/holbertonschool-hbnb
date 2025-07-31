@@ -44,6 +44,10 @@ class HBnBFacade:
     def get_reviews_by_user(self, user_id):
         reviews = self.review_repo.get_all()
         return [review for review in reviews if review.user_id == user_id]
+    
+    def get_reviews_by_place(self, place_id):
+        reviews = self.review_repo.get_all()
+        return [review for review in reviews if review.place_id == place_id]
 
     # Place methods
     def create_place(self, place_data):
@@ -88,7 +92,8 @@ class HBnBFacade:
                 user_id=review_data['user_id'],
                 place_id=review_data['place_id'],
                 valid_user_ids=valid_user_ids,
-                valid_place_ids=valid_place_ids
+                valid_place_ids=valid_place_ids,
+                rating=review_data.get('rating', 5)
             )
         self.review_repo.add(review)
         return review

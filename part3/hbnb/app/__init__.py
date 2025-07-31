@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -13,6 +14,8 @@ def create_app(config_name='default'):
     # Initialize extensions
     jwt = JWTManager(app)
     bcrypt = Bcrypt(app)
+    # Enable CORS for all routes
+    CORS(app)
     
     # JWT Configuration
     @jwt.token_in_blocklist_loader
