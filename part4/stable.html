@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Stable Version</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Override any problematic styles */
+        * {
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        .stable-card {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        
+        .stable-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo-text">hbnb</a>
+            <div style="flex: 1;"></div>
+            <div class="user-menu">
+                <a href="index.html" class="login-button">Back to Main</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="main-content">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">HBnB - Stable Test</h2>
+                    <p class="section-subtitle">This page should NOT refresh or flicker</p>
+                </div>
+
+                <div id="stable-places" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <!-- Static content - no JavaScript -->
+                    <div class="stable-card">
+                        <div class="stable-image">🏠</div>
+                        <h3>Stylish Downtown Loft</h3>
+                        <p>New York, United States</p>
+                        <p><strong>$125</strong> night</p>
+                        <div style="color: #FF385C;">★ 4.8 (127 reviews)</div>
+                    </div>
+                    
+                    <div class="stable-card">
+                        <div class="stable-image">🏖️</div>
+                        <h3>Cozy Beach House</h3>
+                        <p>Santa Monica, United States</p>
+                        <p><strong>$180</strong> night</p>
+                        <div style="color: #FF385C;">★ 4.9 (89 reviews)</div>
+                    </div>
+                    
+                    <div class="stable-card">
+                        <div class="stable-image">⛰️</div>
+                        <h3>Mountain Cabin Retreat</h3>
+                        <p>Aspen, United States</p>
+                        <p><strong>$95</strong> night</p>
+                        <div style="color: #FF385C;">★ 4.7 (156 reviews)</div>
+                    </div>
+                    
+                    <div class="stable-card">
+                        <div class="stable-image">🏛️</div>
+                        <h3>Historic Townhouse</h3>
+                        <p>Boston, United States</p>
+                        <p><strong>$110</strong> night</p>
+                        <div style="color: #FF385C;">★ 4.6 (203 reviews)</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f7f7f7; border-radius: 12px;">
+                    <h3 style="color: #222;">Stability Test</h3>
+                    <p style="color: #717171; margin: 10px 0;">This page should remain completely stable with no refreshing or flickering.</p>
+                    <p style="color: #717171;">If this page is stable, we can apply the same principles to the main site.</p>
+                    <div style="margin-top: 20px;">
+                        <a href="index.html" class="login-button" style="text-decoration: none; margin-right: 10px;">Test Main Site</a>
+                        <a href="demo.html" class="login-button" style="background: #717171; text-decoration: none;">View Demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 HBnB. All rights reserved.</p>
+    </footer>
+
+    <!-- Minimal JavaScript - no loops or constant updates -->
+    <script>
+        console.log('Stable page loaded - no refresh loops');
+        
+        // Add simple click handlers without causing refreshes
+        document.querySelectorAll('.stable-card').forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('Card clicked - no navigation to prevent testing disruption');
+                card.style.backgroundColor = '#f0f0f0';
+                setTimeout(() => {
+                    card.style.backgroundColor = 'white';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>

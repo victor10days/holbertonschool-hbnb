@@ -133,7 +133,8 @@ class PlaceReviews(Resource):
         if not place:
             ns.abort(404, 'Place not found')
         
-        data = ns.payload or {}
+        from flask import request
+        data = request.get_json() or {}
         current_user_id = get_jwt_identity()
         
         # Validate required fields

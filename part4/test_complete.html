@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Complete Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="images/logo.svg" alt="HBnB Logo" class="logo">
+            <a href="index.html" class="login-button">← Back to Home</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="welcome-section">
+            <h1>HBnB Complete Feature Test</h1>
+            <p>Test all features of the application</p>
+        </div>
+
+        <div class="filter-section">
+            <h3>Test Results</h3>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="form">
+            <h2>Feature Tests</h2>
+            <button onclick="runAllTests()" class="details-button">Run All Tests</button>
+            <div id="detailed-results" style="margin-top: 20px;"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 HBnB. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api/v1';
+        let testResults = [];
+
+        async function runTest(testName, testFunction) {
+            try {
+                const result = await testFunction();
+                testResults.push({ name: testName, status: 'PASS', result });
+                return { success: true, result };
+            } catch (error) {
+                testResults.push({ name: testName, status: 'FAIL', error: error.message });
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testApiConnection() {
+            const response = await fetch(`${API_BASE_URL}/places/`);
+            if (!response.ok) throw new Error(`API responded with ${response.status}`);
+            const places = await response.json();
+            return `API connected, found ${places.length} places`;
+        }
+
+        async function testUserRegistration() {
+            const testUser = {
+                first_name: 'Test',
+                last_name: 'User',
+                email: `test${Date.now()}@example.com`,
+                password: 'password123'
+            };
+
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testUser)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `Registration failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return `User registered: ${result.user.first_name} ${result.user.last_name}`;
+        }
+
+        async function testUserLogin() {
+            // Use existing user
+            const loginData = {
+                email: 'jane.smith@example.com',
+                password: 'password123'
+            };
+
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `Login failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+            window.testToken = result.access_token; // Store for other tests
+            return `Login successful, token received`;
+        }
+
+        async function testPlacesList() {
+            const response = await fetch(`${API_BASE_URL}/places/`);
+            if (!response.ok) throw new Error(`Failed to fetch places: ${response.status}`);
+            
+            const places = await response.json();
+            if (!Array.isArray(places)) throw new Error('Places response is not an array');
+            
+            return `Found ${places.length} places, first place: ${places[0]?.title || 'N/A'}`;
+        }
+
+        async function testPlaceDetails() {
+            // Get first place
+            const placesResponse = await fetch(`${API_BASE_URL}/places/`);
+            const places = await placesResponse.json();
+            if (places.length === 0) throw new Error('No places available for testing');
+
+            const placeId = places[0].id;
+            const response = await fetch(`${API_BASE_URL}/places/${placeId}`);
+            if (!response.ok) throw new Error(`Failed to fetch place details: ${response.status}`);
+
+            const place = await response.json();
+            return `Place details loaded: ${place.title}, ${place.reviews?.length || 0} reviews`;
+        }
+
+        async function testAddReview() {
+            if (!window.testToken) throw new Error('No auth token available, login test must run first');
+
+            // Get first place
+            const placesResponse = await fetch(`${API_BASE_URL}/places/`);
+            const places = await placesResponse.json();
+            if (places.length === 0) throw new Error('No places available for testing');
+
+            const placeId = places[0].id;
+            const reviewData = {
+                text: 'Test review from automated test',
+                rating: 4
+            };
+
+            const response = await fetch(`${API_BASE_URL}/places/${placeId}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${window.testToken}`
+                },
+                body: JSON.stringify(reviewData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `Review submission failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return `Review added successfully, ID: ${result.id}`;
+        }
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('test-results');
+            const detailedDiv = document.getElementById('detailed-results');
+            
+            resultsDiv.innerHTML = '<p>Running tests...</p>';
+            detailedDiv.innerHTML = '';
+            testResults = [];
+
+            const tests = [
+                { name: 'API Connection', func: testApiConnection },
+                { name: 'User Registration', func: testUserRegistration },
+                { name: 'User Login', func: testUserLogin },
+                { name: 'Places List', func: testPlacesList },
+                { name: 'Place Details', func: testPlaceDetails },
+                { name: 'Add Review', func: testAddReview }
+            ];
+
+            for (const test of tests) {
+                await runTest(test.name, test.func);
+            }
+
+            // Display results
+            const passed = testResults.filter(r => r.status === 'PASS').length;
+            const total = testResults.length;
+            
+            resultsDiv.innerHTML = `
+                <div class="${passed === total ? 'success-message' : 'error-message'}">
+                    Tests completed: ${passed}/${total} passed
+                </div>
+            `;
+
+            detailedDiv.innerHTML = testResults.map(result => `
+                <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <strong>${result.name}:</strong> 
+                    <span style="color: ${result.status === 'PASS' ? '#137333' : '#d93025'}">
+                        ${result.status}
+                    </span>
+                    <br>
+                    <small>${result.result || result.error}</small>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

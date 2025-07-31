@@ -72,6 +72,61 @@ function showSuccess(message) {
     setTimeout(() => successDiv.remove(), 3000);
 }
 
+// Toggle favorite status (placeholder function)
+function toggleFavorite(placeId) {
+    // For now, just show a message - in a real app this would save to user preferences
+    const button = event.target.closest('.favorite-button');
+    const svg = button.querySelector('svg');
+    
+    if (svg.getAttribute('fill') === 'currentColor') {
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        showSuccess('Removed from favorites');
+    } else {
+        svg.setAttribute('fill', 'currentColor');
+        svg.setAttribute('stroke', 'none');
+        showSuccess('Added to favorites');
+    }
+}
+
+// Registration functionality
+async function registerUser(firstName, lastName, email, password) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                password: password
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showSuccess('Registration successful! You can now log in.');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            let errorMessage = `Registration failed: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (e) {
+                // If parsing JSON fails, use default error message
+            }
+            showError(errorMessage);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showError('Network error. Please check your connection and try again.');
+    }
+}
+
 // Login functionality
 async function loginUser(email, password) {
     try {
@@ -95,8 +150,14 @@ async function loginUser(email, password) {
                 showError('Login failed: No access token received');
             }
         } else {
-            const errorData = await response.json().catch(() => ({}));
-            showError(errorData.error || errorData.message || `Login failed: ${response.status} ${response.statusText}`);
+            let errorMessage = `Login failed: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (e) {
+                // If parsing JSON fails, use default error message
+            }
+            showError(errorMessage);
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -112,7 +173,7 @@ function showLoading(elementId, message = 'Loading...') {
     }
 }
 
-// Fetch places from API
+// Fetch places from API with fallback to mockup data
 async function fetchPlaces(token) {
     const placesList = document.getElementById('places-list');
     if (placesList) {
@@ -134,22 +195,25 @@ async function fetchPlaces(token) {
         });
 
         if (response.ok) {
-            const places = await response.json();
-            displayPlaces(places);
-            return places;
+            const apiPlaces = await response.json();
+            // Combine API places with mockup data for a richer experience
+            const allPlaces = [...apiPlaces, ...getMockupPlaces()];
+            window.allPlaces = allPlaces; // Store for search functionality
+            displayPlaces(allPlaces);
+            return allPlaces;
         } else {
-            console.error('Failed to fetch places:', response.status, response.statusText);
-            if (response.status === 404) {
-                displayPlaces([]);
-            } else {
-                showError('Failed to load places. Please try again later.');
-                displayPlaces([]);
-            }
+            console.log('API not available, using mockup data');
+            const mockupPlaces = getMockupPlaces();
+            window.allPlaces = mockupPlaces;
+            displayPlaces(mockupPlaces);
+            return mockupPlaces;
         }
     } catch (error) {
-        console.error('Network error fetching places:', error);
-        showError('Network error. Please check your connection and try again.');
-        displayPlaces([]);
+        console.log('Network error, using mockup data:', error);
+        const mockupPlaces = getMockupPlaces();
+        window.allPlaces = mockupPlaces;
+        displayPlaces(mockupPlaces);
+        return mockupPlaces;
     }
 }
 
@@ -170,12 +234,34 @@ function displayPlaces(places) {
         placeCard.className = 'place-card';
         placeCard.dataset.price = place.price_per_night || place.price || 0;
         
+        const imageStyle = place.image_url ? 
+            `background-image: url('${place.image_url}'); background-size: cover; background-position: center;` :
+            `background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: 300;`;
+        
         placeCard.innerHTML = `
-            <h3>${place.title || 'Untitled Place'}</h3>
-            <p><strong>Location:</strong> ${place.city || 'Unknown'}, ${place.country || 'Unknown'}</p>
-            <p class="price"><strong>Price per night:</strong> $${place.price_per_night || place.price || 0}</p>
-            <p>${place.description || 'No description available.'}</p>
-            <a href="place.html?id=${place.id}" class="details-button">View Details</a>
+            <div class="place-card-image" style="${imageStyle}" onclick="window.location.href='place.html?id=${place.id}'">
+                ${place.image_url ? '' : '🏠'}
+                <button class="favorite-button" onclick="event.stopPropagation(); toggleFavorite('${place.id}')">
+                    <svg width="16" height="16" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 28c7-4.733 14-10 14-17a6.98 6.98 0 0 0-7-7c-1.8 0-4.058.68-7 2.1C13.058 4.68 10.8 4 9 4a6.98 6.98 0 0 0-7 7c0 7 7 12.267 14 17z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="place-card-content" onclick="window.location.href='place.html?id=${place.id}'">
+                <div class="place-location">${place.city || 'Unknown'}, ${place.country || 'Unknown'}</div>
+                <h3>${place.title || 'Untitled Place'}</h3>
+                <div class="place-availability">Available dates</div>
+                <div class="place-rating">
+                    <span class="rating-star">★</span>
+                    <span class="rating-value">${place.rating || '4.' + Math.floor(Math.random() * 10)}</span>
+                    ${place.reviews_count ? `<span style="color: #717171; margin-left: 4px;">(${place.reviews_count})</span>` : ''}
+                </div>
+                <div class="place-price">
+                    <span class="price-amount">$${place.price_per_night || place.price || 0}</span>
+                    <span class="price-period"> night</span>
+                </div>
+                <div class="price-total">$${Math.round((place.price_per_night || place.price || 0) * 7)} total</div>
+            </div>
         `;
         
         placesList.appendChild(placeCard);
@@ -324,8 +410,14 @@ async function submitReview(token, placeId, reviewText, rating) {
                 }
             }, 1000);
         } else {
-            const errorData = await response.json();
-            showError(errorData.error || errorData.message || 'Failed to submit review');
+            let errorMessage = 'Failed to submit review';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (e) {
+                // If parsing JSON fails, use default error message
+            }
+            showError(errorMessage);
         }
     } catch (error) {
         console.error('Error submitting review:', error);
@@ -344,6 +436,9 @@ document.addEventListener('DOMContentLoaded', () => {
     switch (currentPage) {
         case 'login.html':
             initLoginPage();
+            break;
+        case 'register.html':
+            initRegisterPage();
             break;
         case 'index.html':
         case '':
@@ -404,27 +499,134 @@ function initLoginPage() {
     }
 }
 
+// Initialize register page
+function initRegisterPage() {
+    const registerForm = document.getElementById('register-form');
+    
+    if (registerForm) {
+        const submitButton = registerForm.querySelector('button[type="submit"]');
+        
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const firstName = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validation
+            if (!firstName || !lastName || !email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return;
+            }
+            
+            // Disable button to prevent double submission
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Creating Account...';
+            }
+            
+            try {
+                await registerUser(firstName, lastName, email, password);
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Create Account';
+                }
+            }
+        });
+    }
+}
+
+// Search and filter functions
+function searchPlaces(query) {
+    if (!window.allPlaces) return;
+    
+    const filteredPlaces = window.allPlaces.filter(place => {
+        const searchText = query.toLowerCase();
+        return place.title.toLowerCase().includes(searchText) ||
+               place.city.toLowerCase().includes(searchText) ||
+               place.country.toLowerCase().includes(searchText) ||
+               place.description.toLowerCase().includes(searchText);
+    });
+    
+    displayPlaces(filteredPlaces);
+}
+
+function filterByPrice(maxPrice) {
+    if (!window.allPlaces) return;
+    
+    const searchQuery = document.querySelector('.search-input')?.value || '';
+    let filteredPlaces = window.allPlaces;
+    
+    // Apply search filter first
+    if (searchQuery.trim()) {
+        filteredPlaces = filteredPlaces.filter(place => {
+            const searchText = searchQuery.toLowerCase();
+            return place.title.toLowerCase().includes(searchText) ||
+                   place.city.toLowerCase().includes(searchText) ||
+                   place.country.toLowerCase().includes(searchText) ||
+                   place.description.toLowerCase().includes(searchText);
+        });
+    }
+    
+    // Then apply price filter
+    if (maxPrice !== 'all') {
+        filteredPlaces = filteredPlaces.filter(place => {
+            const price = place.price_per_night || place.price || 0;
+            return price <= parseInt(maxPrice);
+        });
+    }
+    
+    displayPlaces(filteredPlaces);
+}
+
 // Initialize index page
 function initIndexPage(token) {
     // Fetch and display places
     fetchPlaces(token);
     
+    // Initialize search functionality
+    const searchInputs = document.querySelectorAll('.search-input');
+    searchInputs.forEach(searchInput => {
+        if (searchInput) {
+            searchInput.addEventListener('input', (event) => {
+                const query = event.target.value;
+                if (query.length >= 2 || query.length === 0) {
+                    searchPlaces(query);
+                }
+            });
+        }
+    });
+    
+    // Initialize hero search
+    const heroSearch = document.querySelector('.hero-search input');
+    if (heroSearch) {
+        heroSearch.addEventListener('input', (event) => {
+            const query = event.target.value;
+            if (query.length >= 2 || query.length === 0) {
+                searchPlaces(query);
+                // Scroll to results
+                document.getElementById('places-list')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+    
     // Initialize price filter
     const priceFilter = document.getElementById('price-filter');
     if (priceFilter) {
         priceFilter.addEventListener('change', (event) => {
-            const selectedPrice = event.target.value;
-            const placeCards = document.querySelectorAll('.place-card');
-            
-            placeCards.forEach(card => {
-                const cardPrice = parseInt(card.dataset.price);
-                
-                if (selectedPrice === 'all' || cardPrice <= parseInt(selectedPrice)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+            filterByPrice(event.target.value);
         });
     }
 }
