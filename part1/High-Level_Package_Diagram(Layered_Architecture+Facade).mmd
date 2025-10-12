@@ -1,0 +1,110 @@
+classDiagram
+
+namespace PresentationLayer {
+    class APIController {
+        <<controller>>
+        +registerUser(dto)
+        +loginUser(dto)
+        +createPlace(dto)
+        +submitReview(dto)
+        +listPlaces(filters)
+    }
+    class AuthService {
+        <<service>>
+        +hashPassword(password)
+        +verifyToken(token)
+    }
+}
+
+namespace BusinessLayer {
+    class HBnBFacade {
+        <<facade>>
+        +registerUser(dto)
+        +loginUser(dto)
+        +createPlace(dto)
+        +submitReview(dto)
+        +listPlaces(filters)
+    }
+    class UserService {
+        <<service>>
+        +create(dto) User
+        +update(id, dto) User
+        +delete(id) void
+        +getByEmail(email) User
+    }
+    class PlaceService {
+        <<service>>
+        +create(dto) Place
+        +update(id, dto) Place
+        +delete(id) void
+        +list(filters) Place[]
+        +attachAmenity(placeId, amenityId) void
+    }
+    class ReviewService {
+        <<service>>
+        +create(dto) Review
+        +update(id, dto) Review
+        +delete(id) void
+        +listByPlace(placeId) Review[]
+    }
+    class AmenityService {
+        <<service>>
+        +create(dto) Amenity
+        +update(id, dto) Amenity
+        +delete(id) void
+        +list() Amenity[]
+    }
+}
+namespace PersistenceLayer {
+    class UserRepository {
+        <<repository>>
+        +save(user) User
+        +findById(id) User
+        +findByEmail(email) User
+        +delete(id) void
+    }
+    class PlaceRepository {
+        <<repository>>
+        +save(place) Place
+        +findById(id) Place
+        +list(filters) Place[]
+        +delete(id) void
+    }
+    class ReviewRepository {
+        <<repository>>
+        +save(review) Review
+        +findById(id) Review
+        +listByPlace(placeId) Review[]
+        +delete(id) void
+    }
+    class AmenityRepository {
+        <<repository>>
+        +save(amenity) Amenity
+        +findById(id) Amenity
+        +list() Amenity[]
+        +delete(id) void
+    }
+    class Database {
+        <<database>>
+        +connect() void
+        +disconnect() void
+    }
+}
+
+APIController --> HBnBFacade : uses
+AuthService <.. APIController : authN/authZ
+
+HBnBFacade --> UserService
+HBnBFacade --> PlaceService
+HBnBFacade --> ReviewService
+HBnBFacade --> AmenityService
+
+UserService --> UserRepository
+PlaceService --> PlaceRepository
+ReviewService --> ReviewRepository
+AmenityService --> AmenityRepository
+
+UserRepository --> Database
+PlaceRepository --> Database
+ReviewRepository --> Database
+AmenityRepository --> Database
