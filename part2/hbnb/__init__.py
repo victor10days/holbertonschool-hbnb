@@ -1,0 +1,3 @@
+"""
+HBnB package initialization
+"""
