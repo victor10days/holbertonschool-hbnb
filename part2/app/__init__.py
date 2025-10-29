@@ -1,19 +1,14 @@
 from flask import Flask
 from flask_restx import Api
 
-
-def create_app(config_class='config.DevelopmentConfig'):
-    """
-    Create and configure the Flask application.
-
-    Args:
-        config_class: Configuration class to use
-
-    Returns:
-        Flask application instance
-    """
+def create_app():
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API', doc='/api/v1/')
+
+    # Placeholder for API namespaces (endpoints will be added later)
+    # Additional namespaces for places, reviews, and amenities will be added later
+
+    return app
 
     # Initialize Flask-RESTX API
     api = Api(
