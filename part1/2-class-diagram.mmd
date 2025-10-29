@@ -1,0 +1,84 @@
+classDiagram
+    class BaseModel {
+        +id: str
+        +created_at: str
+        +updated_at: str
+        +to_dict() dict
+        +touch() void
+    }
+
+    class User {
+        +email: str
+        -password: str
+        +first_name: str
+        +last_name: str
+        +validate() void
+    }
+
+    class Amenity {
+        +name: str
+        +validate() void
+    }
+
+    class Place {
+        +name: str
+        +description: str
+        +price: float
+        +latitude: float
+        +longitude: float
+        +owner_id: str
+        +amenity_ids: List[str]
+        +validate() void
+    }
+
+    class Review {
+        +text: str
+        +rating: int
+        +user_id: str
+        +place_id: str
+        +validate() void
+    }
+
+    class MemoryRepository {
+        +add(obj)
+        +get(cls, id)
+        +list(cls, predicate)
+        +update(obj)
+        +delete(cls, id)
+    }
+
+    class HbnbFacade {
+        +create_user()
+        +get_user()
+        +list_users()
+        +update_user()
+        +create_amenity()
+        +get_amenity()
+        +list_amenities()
+        +update_amenity()
+        +create_place()
+        +get_place()
+        +list_places()
+        +update_place()
+        +create_review()
+        +get_review()
+        +list_reviews()
+        +update_review()
+        +delete_review()
+    }
+
+    BaseModel <|-- User
+    BaseModel <|-- Amenity
+    BaseModel <|-- Place
+    BaseModel <|-- Review
+
+    HbnbFacade --> User
+    HbnbFacade --> Amenity
+    HbnbFacade --> Place
+    HbnbFacade --> Review
+    HbnbFacade --> MemoryRepository
+
+    Place --> User : owner_id
+    Place --> Amenity : amenity_ids*
+    Review --> User : user_id
+    Review --> Place : place_id

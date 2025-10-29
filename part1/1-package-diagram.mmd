@@ -1,0 +1,35 @@
+%%{init: {"theme":"neutral"}}%%
+graph TD
+    subgraph "Presentation Layer (API)"
+        A[app.py]
+        subgraph "api.v1"
+            B[users]
+            C[amenities]
+            D[places]
+            E[reviews]
+        end
+    end
+
+    subgraph "Business Logic Layer (Models)"
+        F[BaseModel]
+        G[User]
+        H[Amenity]
+        I[Place]
+        J[Review]
+        K[HbnbFacade]
+    end
+
+    subgraph "Persistence Layer"
+        L[MemoryRepository]
+    end
+
+    B --> K
+    C --> K
+    D --> K
+    E --> K
+
+    K --> G
+    K --> H
+    K --> I
+    K --> J
+    K --> L

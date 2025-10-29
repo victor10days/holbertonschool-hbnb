@@ -1,0 +1,51 @@
+sequenceDiagram
+    participant C as Client
+    participant API as Flask RESTx (places)
+    participant F as HbnbFacade
+    participant R as MemoryRepository
+    participant M as Place Model
+
+    C->>API: PUT /api/v1/places/{place_id} {payload}
+    API->>F: update_place(place_id, payload)
+
+    F->>R: get(Place, place_id)
+    R-->>F: Place or None
+
+    alt Place not found
+        F-->>API: raise NotFound
+        API-->>C: 404 Not Found
+    else Place exists
+        alt owner_id in payload
+            F->>R: get(User, payload.owner_id)
+            R-->>F: User or None
+            alt User not found
+                F-->>API: raise BadRequest
+                API-->>C: 400 Bad Request
+            end
+        end
+
+        alt amenity_ids in payload
+            loop for each amenity_id
+                F->>R: get(Amenity, amenity_id)
+                R-->>F: Amenity or None
+                alt Amenity not found
+                    F-->>API: raise BadRequest
+                    API-->>C: 400 Bad Request
+                end
+            end
+        end
+
+        Note over F: Update place attributes
+        F->>M: setattr for each field
+        F->>M: validate()
+        F->>M: touch() - update timestamp
+
+        F->>R: update(place)
+        R-->>F: updated place
+
+        F->>F: _place_expanded(place)
+        Note over F: Include owner and amenities details
+
+        F-->>API: expanded place dict
+        API-->>C: 200 OK + JSON
+    end

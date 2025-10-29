@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant C as Client
+    participant API as Flask RESTx (reviews)
+    participant F as HbnbFacade
+    participant R as MemoryRepository
+
+    C->>API: GET /api/v1/reviews/place/{place_id}
+    API->>F: list_reviews_for_place(place_id)
+
+    F->>R: list(Review, predicate)
+    R-->>F: [Review]
+
+    F-->>API: [review dict]
+    API-->>C: 200 OK + JSON

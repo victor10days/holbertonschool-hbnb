@@ -17,37 +17,33 @@ Complete implementation of Business Logic + API for HBnB project Part 2.
 
 ```
 part2/
-├── app.py                      # Flask app factory + API root
-├── requirements.txt            # Dependencies
-├── hbnb/
-│   ├── __init__.py
-│   ├── facade.py              # Facade for BL <-> API
-│   ├── errors.py              # Error types + handlers
-│   ├── utils.py               # Helpers (UUID, timestamps, pagination)
-│   ├── persistence/
+├── run.py                     # Entry point script to run the application
+├── config.py                  # Configuration classes (Development, Testing, Production)
+├── requirements.txt           # Dependencies (Flask, flask-restx)
+├── app/                       # Main application package
+│   ├── __init__.py           # Flask app factory
+│   ├── models/               # Data models / Business Logic entities
 │   │   ├── __init__.py
-│   │   └── memory_repo.py     # In-memory repository
-│   ├── bl/                    # Business Logic models
+│   │   ├── base.py          # BaseModel (id, created_at, updated_at)
+│   │   ├── user.py          # User model
+│   │   ├── amenity.py       # Amenity model
+│   │   ├── place.py         # Place model
+│   │   └── review.py        # Review model
+│   ├── services/            # Business logic layer
 │   │   ├── __init__.py
-│   │   ├── base.py           # BaseModel (id, created_at, updated_at)
-│   │   ├── user.py           # User model
-│   │   ├── amenity.py        # Amenity model
-│   │   ├── place.py          # Place model
-│   │   └── review.py         # Review model
-│   └── api/                   # API endpoints
+│   │   └── facade.py        # HBnBFacade - Facade pattern for BL
+│   ├── persistence/         # Data persistence layer
+│   │   ├── __init__.py
+│   │   └── repository.py    # Repository (ABC) + InMemoryRepository
+│   └── api/                 # API/Presentation layer
 │       ├── __init__.py
 │       └── v1/
-│           ├── __init__.py
-│           ├── users.py      # /api/v1/users
-│           ├── amenities.py  # /api/v1/amenities
-│           ├── places.py     # /api/v1/places
-│           └── reviews.py    # /api/v1/reviews
-└── tests/
-    ├── __init__.py
-    ├── test_users.py
-    ├── test_amenities.py
-    ├── test_places.py
-    └── test_reviews.py
+│           ├── __init__.py  # API namespace initialization
+│           ├── users.py     # /api/v1/users endpoints
+│           ├── amenities.py # /api/v1/amenities endpoints
+│           ├── places.py    # /api/v1/places endpoints
+│           └── reviews.py   # /api/v1/reviews endpoints
+└── README.md                 # This file
 ```
 
 ## Setup & Run
@@ -61,12 +57,12 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # Run the application
-python app.py
+python run.py
 ```
 
-The API will be available at: **http://localhost:5000**
+The API will be available at: **http://127.0.0.1:5000/**
 
-Swagger UI documentation: **http://localhost:5000/**
+Swagger UI documentation: **http://127.0.0.1:5000/api/v1/docs**
 
 ## API Endpoints
 

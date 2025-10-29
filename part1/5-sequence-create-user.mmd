@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant C as Client
+    participant API as Flask RESTx (users)
+    participant F as HbnbFacade
+    participant R as MemoryRepository
+    participant M as User Model
+
+    C->>API: POST /api/v1/users {email, password, first_name, last_name}
+    API->>F: create_user(payload)
+
+    Note over F: Check for duplicate email
+    F->>R: find_by(User, email=payload.email)
+    R-->>F: [] or [existing_user]
+
+    alt Email already exists
+        F-->>API: raise DuplicateError
+        API-->>C: 409 Conflict
+    else Email is unique
+        F->>M: User(**payload)
+        M->>M: validate()
+        Note over M: Validate email format<br/>Validate password<br/>Validate required fields
+
+        F->>R: add(user)
+        R-->>F: user
+
+        F->>F: _user_public(user)
+        Note over F: Remove password from response
+
+        F-->>API: user dict (no password)
+        API-->>C: 201 Created + JSON
+    end

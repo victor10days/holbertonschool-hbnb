@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant C as Client
+    participant API as Flask RESTx (reviews)
+    participant F as HbnbFacade
+    participant R as MemoryRepository
+
+    C->>API: DELETE /api/v1/reviews/{review_id}
+    API->>F: delete_review(review_id)
+
+    F->>R: get(Review, review_id)
+    R-->>F: Review or None
+
+    alt Review not found
+        F-->>API: raise NotFound
+        API-->>C: 404 Not Found
+    else Review exists
+        F->>R: delete(Review, review_id)
+        Note over R: Remove from storage
+        R-->>F: None
+
+        F-->>API: None
+        API-->>C: 204 No Content
+    end

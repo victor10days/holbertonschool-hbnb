@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant C as Client
+    participant API as Flask RESTx (places)
+    participant F as HbnbFacade
+    participant R as MemoryRepository
+    participant M as Models
+
+    C->>API: POST /api/v1/places {payload}
+    API->>F: create_place(payload)
+
+    F->>R: get(User, owner_id)
+    R-->>F: User or None
+
+    F->>R: get(Amenity, each amenity_id)
+    R-->>F: Amenity or None
+
+    F->>M: new Place(**payload).validate()
+
+    F->>R: add(place)
+    R-->>F: place
+
+    F-->>API: expanded place dict (owner + amenities)
+    API-->>C: 201 Created + JSON
