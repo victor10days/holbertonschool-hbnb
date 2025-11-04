@@ -7,9 +7,9 @@ from hbnb.api.v1.amenities import ns as amenities_ns
 from hbnb.api.v1.places import ns as places_ns
 from hbnb.api.v1.reviews import ns as reviews_ns
 
-def create_app() -> Flask:
+def create_app(config_class="config.DevelopmentConfig") -> Flask:
     app = Flask(__name__)
-    api = Api(app, version="1.0", title="HBnB API", description="HBnB v2 — Part 2")
+    app.config.from_object(config_class)
 
     # attach shared facade
     app.config["FACADE"] = HbnbFacade()
