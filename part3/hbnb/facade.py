@@ -12,11 +12,17 @@ class HbnbFacade:
         self.repo = repo or MemoryRepository()
 
     # ===== Users =====
-    def create_user(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        user = User(**payload)
-        user.validate()
-        self.repo.add(user)
-        return self._user_public(user)
+    def create_user(self, user_data: dict):
+    """Create a new user with hashed password"""
+    from hbnb.bl.user import User
+
+    plain_password = user_data.get("password")
+    user = User(**user_data)
+    user.validate()
+    if plain_password:
+        user.hash_password(plain_password)
+    self.repo.add(user)
+    return self._user_public(user)
 
     def get_user(self, user_id: str) -> Dict[str, Any]:
         user = self.repo.get(User, user_id)
