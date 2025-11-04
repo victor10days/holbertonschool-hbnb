@@ -212,15 +212,6 @@ repo.update(obj)
 repo.delete(Class, id)
 ```
 
-## Notes for Part 3
-
-The architecture is designed for easy migration to SQLAlchemy:
-
-1. **Replace `MemoryRepository`** with SQLAlchemy session-backed repository
-2. **Keep `HbnbFacade` API stable** - only swap repository internals
-3. **Add JWT/RBAC** in Presentation layer decorators
-4. **Models remain mostly unchanged** - just add SQLAlchemy mappings
-
 ## Requirements
 
 - Python 3.10+
