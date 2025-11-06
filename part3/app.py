@@ -6,6 +6,7 @@ from hbnb.facade import HbnbFacade
 from hbnb.api.v1.users import ns as users_ns
 from hbnb.api.v1.amenities import ns as amenities_ns
 from hbnb.api.v1.places import ns as places_ns
+from hbnb.api.v1.reviews import ns as reviews_ns
 from hbnb.api.v1.reviews import ns as auth_ns
 
 def create_app(config_class="config.DevelopmentConfig") -> Flask:
