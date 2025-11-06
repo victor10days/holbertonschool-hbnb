@@ -7,11 +7,15 @@ from hbnb.api.v1.users import ns as users_ns
 from hbnb.api.v1.amenities import ns as amenities_ns
 from hbnb.api.v1.places import ns as places_ns
 from hbnb.api.v1.reviews import ns as reviews_ns
-from hbnb.api.v1.reviews import ns as auth_ns
+from hbnb.api.v1.auth import ns as auth_ns
+from hbnb.bl.user import bcrypt
 
 def create_app(config_class="config.DevelopmentConfig") -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Initialize Bcrypt
+    bcrypt.init_app(app)
 
     # Initialize JWT
     jwt = JWTManager(app)

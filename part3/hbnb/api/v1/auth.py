@@ -4,30 +4,40 @@ from hbnb.api import facade
 
 ns = Namespace("auth", description="Authentication operations")
 
-#Login model
+# Login model
 login_model = ns.model("Login", {
-    "username": fields.String(required=True, description="The user's username"),
-    "password": fields.String(required=True, description="The user's password"),
+    "email": fields.String(required=True, description="User email"),
+    "password": fields.String(required=True, description="User password"),
 })
 
-#Login response model
-login_response_model = ns.model("LoginResponse", {
+# Login response model
+login_response = ns.model("LoginResponse", {
     "access_token": fields.String(description="JWT access token"),
 })
+
 
 @ns.route("/login")
 class Login(Resource):
     @ns.expect(login_model, validate=True)
-    @ns.marshal_with(login_response_model)
+    @ns.marshal_with(login_response, code=200)
+    @ns.response(401, "Invalid credentials")
     def post(self):
-        """Authenticate user and return a JWT token"""
-        data = ns.payload
-        username = data.get("username")
-        password = data.get("password")
+        """Authenticate user and return JWT token"""
+        credentials = ns.payload
+        email = credentials.get("email")
+        password = credentials.get("password")
 
-        user = facade().authenticate_user(username, password)
-        if not user:
-            ns.abort(401, "Invalid username or password")
+        # Get user by email - returns User object with password
+        user = facade().get_user_by_email(email)
 
-        access_token = create_access_token(identity=user.id)
-        return {"access_token": access_token}
+        # Verify user exists and password is correct
+        if not user or not user.verify_password(password):
+            ns.abort(401, "Invalid credentials")
+
+        # Create access token with user identity and is_admin claim
+        access_token = create_access_token(
+            identity=user.id,
+            additional_claims={"is_admin": user.is_admin}
+        )
+
+        return {"access_token": access_token}, 200
