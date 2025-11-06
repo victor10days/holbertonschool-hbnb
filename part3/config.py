@@ -3,6 +3,7 @@ Configuration module for the HBnB application.
 Contains different configuration classes for various environments.
 """
 import os
+from datetime import timedelta
 
 
 class Config:
@@ -13,6 +14,10 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     DEBUG = False
     TESTING = False
+
+    # JWT Configuration
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
 
 class DevelopmentConfig(Config):
