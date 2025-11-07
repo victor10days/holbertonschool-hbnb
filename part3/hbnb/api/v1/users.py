@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required
 from hbnb.api import facade
 
 ns = Namespace("users", description="User operations")
@@ -22,6 +23,11 @@ user_response = ns.model("UserResponse", {
     "updated_at": fields.String(readonly=True, description="Last update date"),
 })
 
+# Model for regular user updates (without email/password) :
+user_update_model = ns.model("UserUpdate", {
+    "first_name": fields.String(description="User first name"),
+    "last_name": fields.String(description="User last name"),
+})
 
 @ns.route("")
 class UserList(Resource):
@@ -48,7 +54,13 @@ class UserItem(Resource):
 
     @ns.expect(user_model, validate=True)
     @ns.marshal_with(user_response)
+    @jwt_required()
     def put(self, user_id):
         """Update user"""
+        current_user_id = get_jwt_identity()
+        if current_user_id != user_id:
+            ns.abort(403, "Permission denied to update this user")
         payload = ns.payload
+        if 'email' in payload or 'password' in payload:
+            ns.abort(400, "Cannot update email or password via this endpoint")
         return facade().update_user(user_id, payload)
