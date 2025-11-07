@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from hbnb.api import facade
 
 ns = Namespace("places", description="Place operations")
@@ -38,7 +39,12 @@ class PlaceList(Resource):
 
     @ns.expect(place_model, validate=True)
     @ns.marshal_with(place_model, code=201)
+    @jwt_required()
     def post(self):
+        """Create a new place"""
+        current_user_id = get_jwt_identity()
+        payload = ns.payload
+        payload['owner_id'] = current_user_id
         return facade().create_place(ns.payload), 201
 
 @ns.route("/<string:place_id>")
@@ -49,5 +55,22 @@ class PlaceItem(Resource):
 
     @ns.expect(place_model, validate=True)
     @ns.marshal_with(place_model)
+    @jwt_required()
     def put(self, place_id):
+        """Update a place"""
+        current_user_id = get_jwt_identity()
+        place = facade().get_place(place_id)
+        if place.owner_id != current_user_id:
+            ns.abort(403, "Permission denied to update this place")
         return facade().update_place(place_id, ns.payload)
+
+    @jwt_required()
+    @ns.response(204, "Place deleted")
+    def delete(self, place_id):
+        """Delete a place"""
+        current_user_id = get_jwt_identity()
+        place = facade().get_place(place_id)
+        if place.owner_id != current_user_id:
+            ns.abort(403, "Permission denied to delete this place")
+        facade().delete_place(place_id)
+        return '', 204

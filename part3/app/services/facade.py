@@ -179,6 +179,9 @@ class HBnBFacade:
 
     def delete_place(self, place_id: str):
         """Delete a place."""
+        if not self.place_repo.get(place_id):
+            raise NotFoundError()
+        self.repo.delete(Place, place_id)
         return self.place_repo.delete(place_id)
 
     # Review operations
@@ -324,3 +327,4 @@ class HBnBFacade:
     def delete_amenity(self, amenity_id: str):
         """Delete an amenity."""
         return self.amenity_repo.delete(amenity_id)
+
