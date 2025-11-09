@@ -19,6 +19,10 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
+    # SQLAlchemy Configuration
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False
+
 
 class DevelopmentConfig(Config):
     """
@@ -27,6 +31,11 @@ class DevelopmentConfig(Config):
     """
     DEBUG = True
     DEVELOPMENT = True
+
+    # SQLite database for development
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///hbnb_dev.db'
+    SQLALCHEMY_ECHO = True  # Log SQL queries in development
 
 
 class TestingConfig(Config):
@@ -37,6 +46,9 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
 
+    # In-memory SQLite database for testing
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+
 
 class ProductionConfig(Config):
     """
@@ -44,7 +56,11 @@ class ProductionConfig(Config):
     Should be used in production deployment.
     """
     DEBUG = False
-    # Additional production-specific settings can be added here
+
+    # MySQL database for production
+    # Format: mysql+pymysql://username:password@host:port/database
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'mysql+pymysql://hbnb_user:hbnb_pwd@localhost/hbnb_prod'
 
 
 # Configuration dictionary for easy access

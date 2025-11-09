@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from .persistence.memory_repo import MemoryRepository
+from .persistence.sqlalchemy_repo import SQLAlchemyRepository
 from .bl.user import User
 from .bl.amenity import Amenity
 from .bl.place import Place
@@ -9,7 +10,20 @@ from .errors import NotFound, BadRequest
 
 
 class HbnbFacade:
-    def __init__(self, repo: MemoryRepository | None = None):
+    """
+    Facade pattern implementation for the HBnB application.
+    Provides a unified interface to the business logic layer.
+    Supports both in-memory and SQLAlchemy repositories.
+    """
+
+    def __init__(self, repo: Union[MemoryRepository, SQLAlchemyRepository, None] = None):
+        """
+        Initialize the facade with a repository.
+
+        Args:
+            repo: Repository instance (MemoryRepository or SQLAlchemyRepository).
+                  Defaults to MemoryRepository if None.
+        """
         self.repo = repo or MemoryRepository()
 
     # ===== Users =====
