@@ -1,21 +1,61 @@
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from dataclasses import dataclass, field, asdict
+from sqlalchemy import String, DateTime
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.sql import func
 
 ISO = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 def now_iso() -> str:
     return datetime.utcnow().strftime(ISO)
 
-@dataclass
-class BaseModel:
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    created_at: str = field(default_factory=now_iso)
-    updated_at: str = field(default_factory=now_iso)
+
+class Base(DeclarativeBase):
+    """SQLAlchemy declarative base"""
+    pass
+
+
+class BaseModel(Base):
+    """
+    Base model for all entities.
+    Provides common attributes: id, created_at, updated_at
+    """
+    __abstract__ = True  # Don't create a table for BaseModel itself
+
+    # Primary key
+    id: Mapped[str] = mapped_column(
+        String(60),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
+    )
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=func.now(),
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        """Convert model instance to dictionary"""
+        result = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            # Convert datetime objects to ISO format strings
+            if isinstance(value, datetime):
+                result[column.name] = value.strftime(ISO)
+            else:
+                result[column.name] = value
+        return result
 
     def touch(self) -> None:
-        self.updated_at = now_iso()
+        """Update the updated_at timestamp"""
+        self.updated_at = datetime.utcnow()

@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Dict, Any, List, Union
 from .persistence.memory_repo import MemoryRepository
 from .persistence.sqlalchemy_repo import SQLAlchemyRepository
+from .persistence.user_repository import UserRepository
 from .bl.user import User
 from .bl.amenity import Amenity
 from .bl.place import Place
@@ -16,12 +17,12 @@ class HbnbFacade:
     Supports both in-memory and SQLAlchemy repositories.
     """
 
-    def __init__(self, repo: Union[MemoryRepository, SQLAlchemyRepository, None] = None):
+    def __init__(self, repo: Union[MemoryRepository, SQLAlchemyRepository, UserRepository, None] = None):
         """
         Initialize the facade with a repository.
 
         Args:
-            repo: Repository instance (MemoryRepository or SQLAlchemyRepository).
+            repo: Repository instance (MemoryRepository, SQLAlchemyRepository, or UserRepository).
                   Defaults to MemoryRepository if None.
         """
         self.repo = repo or MemoryRepository()
@@ -47,6 +48,11 @@ class HbnbFacade:
 
     def get_user_by_email(self, email: str) -> User | None:
         """Get user by email address - returns User object (for authentication)"""
+        # Use UserRepository's specialized method if available
+        if isinstance(self.repo, UserRepository):
+            return self.repo.get_by_email(email)
+
+        # Fallback for MemoryRepository
         users = self.repo.list(User)
         for user in users:
             if user.email == email:
@@ -60,10 +66,16 @@ class HbnbFacade:
         user = self.repo.get(User, user_id)
         if not user:
             raise NotFound()
+
         for k, v in payload.items():
             if k == "id":
                 continue
-            setattr(user, k, v)
+            if k == "password":
+                # Hash the password if it's being updated
+                user.hash_password(v)
+            else:
+                setattr(user, k, v)
+
         user.validate()
         user.touch()
         self.repo.update(user)

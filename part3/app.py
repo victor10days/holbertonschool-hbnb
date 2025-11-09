@@ -4,15 +4,17 @@ from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from hbnb.errors import register_error_handlers
 from hbnb.facade import HbnbFacade
+from hbnb.persistence.user_repository import UserRepository
 from hbnb.api.v1.users import ns as users_ns
 from hbnb.api.v1.amenities import ns as amenities_ns
 from hbnb.api.v1.places import ns as places_ns
 from hbnb.api.v1.reviews import ns as reviews_ns
 from hbnb.api.v1.auth import ns as auth_ns
 from hbnb.bl.user import bcrypt
+from hbnb.bl.base import Base
 
-# Initialize SQLAlchemy (without binding to app yet)
-db = SQLAlchemy()
+# Initialize SQLAlchemy with our custom Base class
+db = SQLAlchemy(model_class=Base)
 
 def create_app(config_class="config.DevelopmentConfig") -> Flask:
     app = Flask(__name__)
@@ -23,12 +25,15 @@ def create_app(config_class="config.DevelopmentConfig") -> Flask:
     jwt = JWTManager(app)
     db.init_app(app)
 
-    # Create database tables (will be used once models are mapped in Task 6)
+    # Create database tables
     with app.app_context():
         db.create_all()
 
-    # attach shared facade
-    app.config["FACADE"] = HbnbFacade()
+        # Initialize UserRepository with database session
+        user_repo = UserRepository(db.session)
+
+        # Attach shared facade with the UserRepository
+        app.config["FACADE"] = HbnbFacade(repo=user_repo)
 
     # Initialize API
     api = Api(
