@@ -1,27 +1,30 @@
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
 from .base import BaseModel
+
 
 class Amenity(BaseModel):
     """
-    Amenity model.
-    NOTE: Marked as abstract temporarily - will be fully mapped in Task 7
-    """
-    __abstract__ = True  # Temporarily abstract until Task 7
+    Amenity model for place amenities.
 
-    name: str = ""
+    Attributes:
+        name: Amenity name (e.g., WiFi, Pool, Parking)
+    """
+    __tablename__ = 'amenities'
+
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
 
     def __init__(self, name: str = "", **kwargs):
+        """
+        Initialize Amenity instance.
+
+        Args:
+            name: Amenity name
+        """
         super().__init__(**kwargs)
         self.name = name
 
     def validate(self) -> None:
+        """Validate amenity data"""
         if not self.name:
             raise ValueError("name is required")
-
-    def to_dict(self) -> dict:
-        """Simple to_dict for compatibility"""
-        return {
-            'id': self.id if hasattr(self, 'id') else '',
-            'name': self.name,
-            'created_at': self.created_at if hasattr(self, 'created_at') else '',
-            'updated_at': self.updated_at if hasattr(self, 'updated_at') else ''
-        }

@@ -1,24 +1,50 @@
 from typing import List
+from sqlalchemy import String, Float, ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column
 from .base import BaseModel
+import json
+
 
 class Place(BaseModel):
     """
-    Place model.
-    NOTE: Marked as abstract temporarily - will be fully mapped in Task 7
-    """
-    __abstract__ = True  # Temporarily abstract until Task 7
+    Place model for rental properties.
 
-    name: str = ""
-    description: str = ""
-    price: float = 0.0
-    latitude: float = 0.0
-    longitude: float = 0.0
-    owner_id: str = ""  # User.id
-    amenity_ids: List[str] = []  # Amenity.id
+    Attributes:
+        name: Place name
+        description: Place description
+        price: Price per night
+        latitude: Latitude coordinate
+        longitude: Longitude coordinate
+        owner_id: User ID of the owner (foreign key)
+        amenity_ids: List of amenity IDs (stored as JSON)
+    """
+    __tablename__ = 'places'
+
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    latitude: Mapped[float] = mapped_column(Float, nullable=False)
+    longitude: Mapped[float] = mapped_column(Float, nullable=False)
+    owner_id: Mapped[str] = mapped_column(String(60), ForeignKey('users.id'), nullable=False)
+
+    # Store amenity_ids as JSON text (relationships will be added in Task 8)
+    _amenity_ids_json: Mapped[str] = mapped_column('amenity_ids', Text, default='[]', nullable=False)
 
     def __init__(self, name: str = "", description: str = "", price: float = 0.0,
                  latitude: float = 0.0, longitude: float = 0.0, owner_id: str = "",
                  amenity_ids: List[str] = None, **kwargs):
+        """
+        Initialize Place instance.
+
+        Args:
+            name: Place name
+            description: Place description
+            price: Price per night
+            latitude: Latitude coordinate
+            longitude: Longitude coordinate
+            owner_id: User ID of the owner
+            amenity_ids: List of amenity IDs
+        """
         super().__init__(**kwargs)
         self.name = name
         self.description = description
@@ -28,7 +54,21 @@ class Place(BaseModel):
         self.owner_id = owner_id
         self.amenity_ids = amenity_ids or []
 
+    @property
+    def amenity_ids(self) -> List[str]:
+        """Get amenity_ids from JSON storage"""
+        try:
+            return json.loads(self._amenity_ids_json) if self._amenity_ids_json else []
+        except (json.JSONDecodeError, AttributeError):
+            return []
+
+    @amenity_ids.setter
+    def amenity_ids(self, value: List[str]):
+        """Set amenity_ids to JSON storage"""
+        self._amenity_ids_json = json.dumps(value if value else [])
+
     def validate(self) -> None:
+        """Validate place data"""
         if not self.name:
             raise ValueError("name is required")
         if self.price < 0:
@@ -39,18 +79,3 @@ class Place(BaseModel):
             raise ValueError("longitude must be in [-180,180]")
         if not self.owner_id:
             raise ValueError("owner_id is required")
-
-    def to_dict(self) -> dict:
-        """Simple to_dict for compatibility"""
-        return {
-            'id': self.id if hasattr(self, 'id') else '',
-            'name': self.name,
-            'description': self.description,
-            'price': self.price,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            'owner_id': self.owner_id,
-            'amenity_ids': self.amenity_ids,
-            'created_at': self.created_at if hasattr(self, 'created_at') else '',
-            'updated_at': self.updated_at if hasattr(self, 'updated_at') else ''
-        }

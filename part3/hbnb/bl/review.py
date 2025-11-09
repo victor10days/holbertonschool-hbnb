@@ -1,19 +1,36 @@
+from sqlalchemy import String, Integer, ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column
 from .base import BaseModel
+
 
 class Review(BaseModel):
     """
-    Review model.
-    NOTE: Marked as abstract temporarily - will be fully mapped in Task 7
-    """
-    __abstract__ = True  # Temporarily abstract until Task 7
+    Review model for place reviews.
 
-    text: str = ""
-    user_id: str = ""   # User.id
-    place_id: str = ""  # Place.id
-    rating: int = 0      # optional, 0-5
+    Attributes:
+        text: Review text content
+        user_id: User ID of the reviewer (foreign key)
+        place_id: Place ID being reviewed (foreign key)
+        rating: Rating from 0 to 5
+    """
+    __tablename__ = 'reviews'
+
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    user_id: Mapped[str] = mapped_column(String(60), ForeignKey('users.id'), nullable=False)
+    place_id: Mapped[str] = mapped_column(String(60), ForeignKey('places.id'), nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     def __init__(self, text: str = "", user_id: str = "", place_id: str = "",
                  rating: int = 0, **kwargs):
+        """
+        Initialize Review instance.
+
+        Args:
+            text: Review text content
+            user_id: User ID of the reviewer
+            place_id: Place ID being reviewed
+            rating: Rating from 0 to 5
+        """
         super().__init__(**kwargs)
         self.text = text
         self.user_id = user_id
@@ -21,6 +38,7 @@ class Review(BaseModel):
         self.rating = rating
 
     def validate(self) -> None:
+        """Validate review data"""
         if not self.text:
             raise ValueError("text is required")
         if not self.user_id:
@@ -29,15 +47,3 @@ class Review(BaseModel):
             raise ValueError("place_id is required")
         if not (0 <= self.rating <= 5):
             raise ValueError("rating must be 0..5")
-
-    def to_dict(self) -> dict:
-        """Simple to_dict for compatibility"""
-        return {
-            'id': self.id if hasattr(self, 'id') else '',
-            'text': self.text,
-            'user_id': self.user_id,
-            'place_id': self.place_id,
-            'rating': self.rating,
-            'created_at': self.created_at if hasattr(self, 'created_at') else '',
-            'updated_at': self.updated_at if hasattr(self, 'updated_at') else ''
-        }
