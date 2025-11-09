@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from hbnb.api import facade
 
 ns = Namespace("reviews", description="Review operations")
@@ -47,20 +47,32 @@ class ReviewItem(Resource):
     @ns.marshal_with(review_model)
     @jwt_required()
     def put(self, review_id):
-        """Update a review"""
+        """Update a review (owner or admin)"""
         current_user_id = get_jwt_identity()
-        review = facade().get_review(review_id)
-        if review.user_id != current_user_id:
-            ns.abort(403, "Permission denied to update this review")
+        claims = get_jwt()
+        is_admin = claims.get("is_admin", False)
+
+        # Check ownership unless user is admin
+        if not is_admin:
+            review = facade().get_review(review_id)
+            if review.user_id != current_user_id:
+                ns.abort(403, "Permission denied to update this review")
+
         return facade().update_review(review_id, ns.payload)
 
     @jwt_required()
     def delete(self, review_id):
-        """Delete a review"""
+        """Delete a review (owner or admin)"""
         current_user_id = get_jwt_identity()
-        review = facade().get_review(review_id)
-        if review.user_id != current_user_id:
-            ns.abort(403, "Permission denied to delete this review")
+        claims = get_jwt()
+        is_admin = claims.get("is_admin", False)
+
+        # Check ownership unless user is admin
+        if not is_admin:
+            review = facade().get_review(review_id)
+            if review.user_id != current_user_id:
+                ns.abort(403, "Permission denied to delete this review")
+
         facade().delete_review(review_id)
         return {"status": "deleted"}, 204
 

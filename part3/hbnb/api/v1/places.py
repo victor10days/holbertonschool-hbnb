@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from hbnb.api import facade
 
 ns = Namespace("places", description="Place operations")
@@ -57,20 +57,32 @@ class PlaceItem(Resource):
     @ns.marshal_with(place_model)
     @jwt_required()
     def put(self, place_id):
-        """Update a place"""
+        """Update a place (owner or admin)"""
         current_user_id = get_jwt_identity()
-        place = facade().get_place(place_id)
-        if place.owner_id != current_user_id:
-            ns.abort(403, "Permission denied to update this place")
+        claims = get_jwt()
+        is_admin = claims.get("is_admin", False)
+
+        # Check ownership unless user is admin
+        if not is_admin:
+            place = facade().get_place(place_id)
+            if place.owner_id != current_user_id:
+                ns.abort(403, "Permission denied to update this place")
+
         return facade().update_place(place_id, ns.payload)
 
     @jwt_required()
     @ns.response(204, "Place deleted")
     def delete(self, place_id):
-        """Delete a place"""
+        """Delete a place (owner or admin)"""
         current_user_id = get_jwt_identity()
-        place = facade().get_place(place_id)
-        if place.owner_id != current_user_id:
-            ns.abort(403, "Permission denied to delete this place")
+        claims = get_jwt()
+        is_admin = claims.get("is_admin", False)
+
+        # Check ownership unless user is admin
+        if not is_admin:
+            place = facade().get_place(place_id)
+            if place.owner_id != current_user_id:
+                ns.abort(403, "Permission denied to delete this place")
+
         facade().delete_place(place_id)
         return '', 204
