@@ -1,8 +1,13 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 from sqlalchemy import String, Float, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column
-from .base import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from .base import BaseModel, place_amenity
 import json
+
+if TYPE_CHECKING:
+    from .user import User
+    from .review import Review
+    from .amenity import Amenity
 
 
 class Place(BaseModel):
@@ -16,7 +21,9 @@ class Place(BaseModel):
         latitude: Latitude coordinate
         longitude: Longitude coordinate
         owner_id: User ID of the owner (foreign key)
-        amenity_ids: List of amenity IDs (stored as JSON)
+        owner: User who owns this place (many-to-one)
+        reviews: List of reviews for this place (one-to-many)
+        amenities: List of amenities for this place (many-to-many)
     """
     __tablename__ = 'places'
 
@@ -27,7 +34,12 @@ class Place(BaseModel):
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
     owner_id: Mapped[str] = mapped_column(String(60), ForeignKey('users.id'), nullable=False)
 
-    # Store amenity_ids as JSON text (relationships will be added in Task 8)
+    # Relationships
+    owner: Mapped["User"] = relationship("User", back_populates="places")
+    reviews: Mapped[List["Review"]] = relationship("Review", back_populates="place", cascade="all, delete-orphan")
+    amenities: Mapped[List["Amenity"]] = relationship("Amenity", secondary=place_amenity, back_populates="places")
+
+    # Store amenity_ids as JSON text for backward compatibility
     _amenity_ids_json: Mapped[str] = mapped_column('amenity_ids', Text, default='[]', nullable=False)
 
     def __init__(self, name: str = "", description: str = "", price: float = 0.0,

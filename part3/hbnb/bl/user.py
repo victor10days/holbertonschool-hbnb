@@ -1,7 +1,12 @@
 from sqlalchemy import String, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import BaseModel
 from flask_bcrypt import Bcrypt
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from .place import Place
+    from .review import Review
 
 bcrypt = Bcrypt()
 
@@ -16,6 +21,8 @@ class User(BaseModel):
         first_name: User's first name
         last_name: User's last name
         is_admin: Whether user has admin privileges
+        places: List of places owned by this user (one-to-many)
+        reviews: List of reviews written by this user (one-to-many)
     """
     __tablename__ = 'users'
 
@@ -24,6 +31,10 @@ class User(BaseModel):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationships
+    places: Mapped[List["Place"]] = relationship("Place", back_populates="owner", cascade="all, delete-orphan")
+    reviews: Mapped[List["Review"]] = relationship("Review", back_populates="user", cascade="all, delete-orphan")
 
     def __init__(self, email: str = "", password: str = "", first_name: str = "",
                  last_name: str = "", is_admin: bool = False, **kwargs):
