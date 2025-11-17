@@ -6,7 +6,8 @@ ns = Namespace("amenities", description="Amenity operations")
 
 amenity_model = ns.model("Amenity", {
     "id": fields.String(readonly=True),
-    "name": fields.String(required=True),
+    "name": fields.String(required=True, description="Amenity name"),
+    "description": fields.String(description="Amenity description"),
     "created_at": fields.String(readonly=True),
     "updated_at": fields.String(readonly=True),
 })

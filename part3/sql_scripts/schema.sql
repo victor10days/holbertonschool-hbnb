@@ -58,7 +58,8 @@ CREATE TABLE amenities (
     id VARCHAR(60) PRIMARY KEY,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    name VARCHAR(50) NOT NULL
+    name VARCHAR(50) NOT NULL,
+    description TEXT
 );
 
 -- Create place_amenity association table (many-to-many)

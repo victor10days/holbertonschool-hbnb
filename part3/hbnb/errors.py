@@ -14,7 +14,11 @@ class Conflict(HTTPException):
     description = "Conflict"
 
 def register_error_handlers(app):
+    def handle_http_exception(e):
+        return jsonify({
+            "error": e.description,
+            "status": e.code
+        }), e.code
+
     for exc in (NotFound, BadRequest, Conflict):
-        app.register_error_handler(exc, lambda e: (jsonify({
-            "error": e.description, "status": e.code
-        }), e.code))
+        app.register_error_handler(exc, handle_http_exception)
