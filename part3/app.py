@@ -2,6 +2,7 @@ from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from hbnb.errors import register_error_handlers
 from hbnb.facade import HbnbFacade
 from hbnb.persistence.user_repository import UserRepository
@@ -15,6 +16,8 @@ from hbnb.bl.base import Base
 
 # Initialize SQLAlchemy with our custom Base class
 db = SQLAlchemy(model_class=Base)
+app = Flask(__name__)
+CORS(app)
 
 def create_app(config_class="config.DevelopmentConfig") -> Flask:
     app = Flask(__name__)
