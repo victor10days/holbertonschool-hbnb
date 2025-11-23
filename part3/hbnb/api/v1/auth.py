@@ -15,6 +15,47 @@ login_response = ns.model("LoginResponse", {
     "access_token": fields.String(description="JWT access token"),
 })
 
+# Register model
+register_model = ns.model("Register", {
+    "email": fields.String(required=True, description="User email"),
+    "password": fields.String(required=True, description="User password"),
+    "first_name": fields.String(required=True, description="User first name"),
+    "last_name": fields.String(required=True, description="User last name"),
+})
+
+# User response model (without password)
+user_response = ns.model("UserResponse", {
+    "id": fields.String(readonly=True, description="User ID"),
+    "email": fields.String(readonly=True, description="User email"),
+    "first_name": fields.String(readonly=True, description="User first name"),
+    "last_name": fields.String(readonly=True, description="User last name"),
+    "is_admin": fields.Boolean(readonly=True, description="Admin status"),
+    "created_at": fields.String(readonly=True, description="Creation date"),
+    "updated_at": fields.String(readonly=True, description="Last update date"),
+})
+
+
+@ns.route("/register")
+class Register(Resource):
+    @ns.expect(register_model, validate=True)
+    @ns.marshal_with(user_response, code=201)
+    @ns.response(400, "Invalid input or email already exists")
+    def post(self):
+        """Register a new user"""
+        user_data = ns.payload
+
+        # Check if user already exists
+        existing_user = facade().get_user_by_email(user_data["email"])
+        if existing_user:
+            ns.abort(400, "Email already registered")
+
+        # Create the user (facade will hash the password)
+        try:
+            new_user = facade().create_user(user_data)
+            return new_user, 201
+        except ValueError as e:
+            ns.abort(400, str(e))
+
 
 @ns.route("/login")
 class Login(Resource):

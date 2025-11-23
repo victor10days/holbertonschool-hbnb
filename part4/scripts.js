@@ -15,6 +15,77 @@ function setCookie(name, value, days = 7) {
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
+function handleRegister() {
+    const registerForm = document.getElementById('register-form');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+
+            // Clear previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters long!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        first_name: firstName,
+                        last_name: lastName
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    successMessage.textContent = 'Registration successful! Redirecting to login...';
+                    successMessage.style.display = 'block';
+
+                    // Redirect to login page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    const errorData = await response.json();
+                    errorMessage.textContent = 'Registration failed: ' + (errorData.message || response.statusText);
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'An error occurred during registration. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+    }
+}
+
 function handleLogin() {
     const loginForm = document.getElementById('login-form');
 
@@ -54,11 +125,21 @@ function checkAuthentication() {
     const token = getCookie('token');
 
     const loginLink = document.getElementById('login-link');
+    const registerLink = document.getElementById('register-link');
+
     if (loginLink) {
         if (token) {
             loginLink.style.display = 'none';
         } else {
             loginLink.style.display = 'block';
+        }
+    }
+
+    if (registerLink) {
+        if (token) {
+            registerLink.style.display = 'none';
+        } else {
+            registerLink.style.display = 'block';
         }
     }
 
@@ -283,7 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
     const page = path.substring(path.lastIndexOf('/') + 1);
 
-    if (page === 'login.html' || page === '') {
+    if (page === 'register.html') {
+        handleRegister();
+    } else if (page === 'login.html' || page === '') {
         handleLogin();
     } else if (page === 'index.html') {
         checkAuthentication();

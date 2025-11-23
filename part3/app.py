@@ -13,17 +13,17 @@ from hbnb.api.v1.reviews import ns as reviews_ns
 from hbnb.api.v1.auth import ns as auth_ns
 from hbnb.bl.user import bcrypt
 from hbnb.bl.base import Base
+from config import config
 
 # Initialize SQLAlchemy with our custom Base class
 db = SQLAlchemy(model_class=Base)
-app = Flask(__name__)
-CORS(app)
 
-def create_app(config_class="config.DevelopmentConfig") -> Flask:
+def create_app(config_name="development") -> Flask:
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    app.config.from_object(config[config_name])
 
     # Initialize extensions
+    CORS(app)  # Enable CORS for all routes
     bcrypt.init_app(app)
     jwt = JWTManager(app)
     db.init_app(app)
