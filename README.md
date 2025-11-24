@@ -522,11 +522,3 @@ This project is part of the Holberton School curriculum.
 ## Acknowledgments
 
 - Holberton School staff and mentors
-- Flask and SQLAlchemy communities
-- All contributors and reviewers
-
----
-
-**Built with dedication by Holberton School students**
-
-For detailed documentation on each part, please refer to the README files in each part's directory.
