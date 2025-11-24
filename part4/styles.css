@@ -13,7 +13,7 @@ body {
 
 
 header {
-    background-color: #ff5a5f;
+    background-color: #ff9800;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -41,7 +41,7 @@ header nav a {
 
 .login-button {
     background-color: white;
-    color: #ff5a5f;
+    color: #ff9800;
     padding: 0.5rem 1rem;
     border-radius: 25px;
     font-weight: 600;
@@ -84,7 +84,8 @@ h1, h2 {
     background: white;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 1.5rem;
+    padding: 10px;
+    margin: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s ease;
 }
@@ -100,14 +101,14 @@ h1, h2 {
 }
 
 .place-card .price {
-    color:#ff5a5f;
+    color:#ff9800;
     font-size: 1.2rem;
     font-weight: bold;
     margin: 1rem 0;
 }
 
 .details-button {
-    background-color: #ff5a5f;
+    background-color: #ff9800;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -118,7 +119,7 @@ h1, h2 {
 }
 
 .details-button:hover {
-    background-color: #e04f54;
+    background-color: #df8600;
 }
 
 .place-details {
@@ -142,10 +143,10 @@ h1, h2 {
 
 .review-card {
     background: #f9f9f9;
-    padding: 1rem;
+    padding: 10px;
+    margin: 20px;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    border-radius: 10px;
 }
 
 .review-card .reviewer-name {
@@ -194,7 +195,7 @@ form select {
 }
 
 form button[type="submit"] {
-    background-color: #ff5a5f;
+    background-color: #ff9800;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -206,7 +207,7 @@ form button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #e04f54;
+    background-color: #ff9800;
 }
 
 footer {

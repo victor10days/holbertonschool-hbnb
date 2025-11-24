@@ -331,6 +331,37 @@ function displayReviews(reviews) {
     });
 }
 
+async function fetchPlaceInfoForReview(placeId, token) {
+    try {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const response = await fetch(`${API_BASE_URL}/places/${placeId}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (response.ok) {
+            const place = await response.json();
+            displayPlaceInfoOnReview(place);
+        } else {
+            console.error('Failed to fetch place info:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching place info:', error);
+    }
+}
+
+function displayPlaceInfoOnReview(place) {
+    const placeInfo = document.getElementById('place-info');
+
+    if (!placeInfo) return;
+
+    placeInfo.innerHTML = `
+        <h3>Reviewing: ${place.name}</h3>
+        <p><strong>Price:</strong> $${place.price} per night</p>
+    `;
+}
+
 function handleAddReview() {
     const token = checkAuthentication();
     if (!token) {
@@ -339,6 +370,11 @@ function handleAddReview() {
     }
 
     const placeId = getPlaceIdFromURL();
+
+    // Fetch and display place information
+    if (placeId) {
+        fetchPlaceInfoForReview(placeId, token);
+    }
 
     const reviewForm = document.getElementById('review-form');
 
