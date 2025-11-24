@@ -30,7 +30,7 @@ place_model = ns.model("Place", {
     "updated_at": fields.String(readonly=True),
 })
 
-@ns.route("")
+@ns.route("/")
 class PlaceList(Resource):
     @ns.marshal_list_with(place_model)
     def get(self):

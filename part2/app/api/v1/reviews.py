@@ -89,11 +89,25 @@ class ReviewResource(Resource):
             reviews_ns.abort(400, str(e))
 
     @reviews_ns.doc('delete_review')
-    @reviews_ns.response(200, 'Review deleted successfully')
+    @reviews_ns.response(204, 'Review deleted successfully')
     @reviews_ns.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review."""
         result = facade.delete_review(review_id)
         if not result:
             reviews_ns.abort(404, 'Review not found')
-        return {'message': 'Review deleted successfully'}, 200
+        return '', 204
+
+
+@reviews_ns.route('/place/<string:place_id>')
+@reviews_ns.param('place_id', 'The place identifier')
+class PlaceReviews(Resource):
+    """Reviews for a specific place endpoint."""
+
+    @reviews_ns.doc('get_place_reviews')
+    @reviews_ns.marshal_list_with(review_model)
+    @reviews_ns.response(200, 'Success')
+    def get(self, place_id):
+        """Retrieve all reviews for a specific place."""
+        reviews = facade.get_reviews_by_place(place_id)
+        return [review.to_dict() for review in reviews], 200

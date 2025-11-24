@@ -13,7 +13,7 @@ review_model = ns.model("Review", {
     "updated_at": fields.String(readonly=True),
 })
 
-@ns.route("")
+@ns.route("/")
 class ReviewList(Resource):
     @ns.marshal_list_with(review_model)
     def get(self):

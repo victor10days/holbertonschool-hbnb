@@ -17,7 +17,7 @@ user_public = ns.clone("UserPublic", user_model, {
     "password": fields.Raw(discriminator=True, description="omitted in responses")
 })
 
-@ns.route("")
+@ns.route("/")
 class UserList(Resource):
     @ns.marshal_list_with(user_model, skip_none=True)
     def get(self):

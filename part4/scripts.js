@@ -15,6 +15,15 @@ function setCookie(name, value, days = 7) {
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
+function deleteCookie(name) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+}
+
+function handleLogout() {
+    deleteCookie('token');
+    window.location.href = 'index.html';
+}
+
 function handleRegister() {
     const registerForm = document.getElementById('register-form');
 
@@ -126,6 +135,7 @@ function checkAuthentication() {
 
     const loginLink = document.getElementById('login-link');
     const registerLink = document.getElementById('register-link');
+    const logoutLink = document.getElementById('logout-link');
 
     if (loginLink) {
         if (token) {
@@ -140,6 +150,18 @@ function checkAuthentication() {
             registerLink.style.display = 'none';
         } else {
             registerLink.style.display = 'block';
+        }
+    }
+
+    if (logoutLink) {
+        if (token) {
+            logoutLink.style.display = 'block';
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                handleLogout();
+            });
+        } else {
+            logoutLink.style.display = 'none';
         }
     }
 

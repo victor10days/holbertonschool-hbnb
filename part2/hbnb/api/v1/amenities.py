@@ -10,7 +10,7 @@ amenity_model = ns.model("Amenity", {
     "updated_at": fields.String(readonly=True),
 })
 
-@ns.route("")
+@ns.route("/")
 class AmenityList(Resource):
     @ns.marshal_list_with(amenity_model)
     def get(self):
