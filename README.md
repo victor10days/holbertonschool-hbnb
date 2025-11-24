@@ -518,7 +518,3 @@ cd part3
 
 This project is part of the Holberton School curriculum.
 © 2024 Holberton School. All rights reserved.
-
-## Acknowledgments
-
-- Holberton School staff and mentors
